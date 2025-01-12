@@ -6,11 +6,12 @@ import Colors from '@/data/Colors';
 import Lookup from '@/data/Lookup';
 import Prompt from '@/data/Prompt';
 import axios from 'axios';
-import { useConvex } from 'convex/react';
+import { useConvex, useMutation } from 'convex/react';
 import { ArrowRight, Link, Loader2Icon } from 'lucide-react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 function ChatView() {
   const { id } = useParams();
@@ -19,6 +20,7 @@ function ChatView() {
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
   const [userInput, setUserInput] = useState();
   const [loading, setLoading] = useState(true);
+  const UpdateMessages = useMutation(api.workspace.UpdateMessages);
 
   useEffect(() => {
     id && GetWorkspaceData();
@@ -51,18 +53,23 @@ function ChatView() {
       prompt: PROMPT,
     });
     console.log(result.data.result);
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: 'ai',
-        content: result.data.result,
-      },
-    ]);
+    const aiResp = {
+      role: 'ai',
+      content: result.data.result,
+    };
+    setMessages((prev) => [...prev, aiResp]);
+
+    await UpdateMessages({
+      messages: [...messages, aiResp],
+      workspaceId:id
+    });
+
     setLoading(false);
   };
 
   const onGenerate = (input) => {
     setMessages((prev) => [...prev, { role: 'user', content: input }]);
+    setUserInput(''); 
   };
 
   return (
@@ -85,7 +92,7 @@ function ChatView() {
                 className="rounded-full"
               />
             )}
-            <h2>{msg?.content}</h2>
+            <ReactMarkdown className='flex flex-col'>{msg?.content}</ReactMarkdown>
           </div>
         ))}
         {loading && (
@@ -113,6 +120,7 @@ function ChatView() {
             placeholder={Lookup.INPUT_PLACEHOLDER}
             className="outline-none bg-transparent w-full h-32 max-h-56 resize-none"
             onChange={(event) => setUserInput(event.target.value)}
+            value={userInput}
           />
           {userInput && (
             <ArrowRight
