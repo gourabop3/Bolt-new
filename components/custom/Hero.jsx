@@ -34,10 +34,7 @@ function Hero() {
       messages: [msg],
     });
     console.log(workspaceId);
-    router.push('/workspace/' + workspaceId); {
-      role: 'user',
-      content: input,
-    }
+    router.push('/workspace/' + workspaceId);
   };
 
   return (
