@@ -4,12 +4,13 @@ import React, { useContext } from 'react';
 import { Button } from '../ui/button';
 import Colors from '@/data/Colors';
 import { UserDetailContext } from '@/context/UserDetailContext';
+import Link from 'next/link';
 
 function Header() {
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
   return (
     <div className="p-4 flex justify-between items-center">
-      <Image src={'/logo.png'} alt="logo" width={40} height={40} />
+      <Link href={"/"}><Image src={'/logo.png'} alt="logo" width={40} height={40} /></Link>
       {!userDetail?.name && (
         <div className="flex gap-5">
           <Button variant="ghost">Sign In</Button>

@@ -52,7 +52,7 @@ function CodeView() {
   }, [messages]);
 
   const GenerateAiCode = async () => {
-    // return;
+    return;
     setLoading(true);
     const PROMPT = JSON.stringify(messages) + ' ' + Prompt.CODE_GEN_PROMPT;
     console.log({ PROMPT });
