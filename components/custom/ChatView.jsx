@@ -19,8 +19,9 @@ function ChatView() {
   const { messages, setMessages } = useContext(MessagesContext);
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
   const [userInput, setUserInput] = useState();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const UpdateMessages = useMutation(api.workspace.UpdateMessages);
+  
 
   useEffect(() => {
     id && GetWorkspaceData();
@@ -45,7 +46,7 @@ function ChatView() {
   }, [messages]);
 
   const GetAiResponse = async () => {
-    return; 
+    // return; 
     setLoading(true);
     const PROMPT = JSON.stringify(messages) + Prompt.CHAT_PROMPT;
     console.log({ PROMPT });
