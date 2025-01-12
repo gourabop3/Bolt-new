@@ -16,6 +16,8 @@ import { useConvex, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useParams } from 'next/navigation';
 import { Loader2Icon } from 'lucide-react';
+import { countToken } from './ChatView';
+import { UserDetailContext } from '@/context/UserDetailContext';
 
 function CodeView() {
   const { id } = useParams();
@@ -23,8 +25,11 @@ function CodeView() {
   const [files, setFiles] = useState(Lookup?.DEFAULT_FILE);
   const { messages, setMessages } = useContext(MessagesContext);
   const UpdateFiles = useMutation(api.workspace.UpdateFiles);
+  const { userDetail, setUserDetail } = useContext(UserDetailContext);
+
   const convex = useConvex();
   const [loading, setLoading] = useState(false);
+  const UpdateToken = useMutation(api.users.UpdateToken);
 
   useEffect(() => {
     id && GetFiles();
@@ -52,7 +57,7 @@ function CodeView() {
   }, [messages]);
 
   const GenerateAiCode = async () => {
-    return;
+    // return;
     setLoading(true);
     const PROMPT = JSON.stringify(messages) + ' ' + Prompt.CODE_GEN_PROMPT;
     console.log({ PROMPT });
@@ -69,6 +74,12 @@ function CodeView() {
       files: aiResp?.files,
     });
     setLoading(false);
+    const token =
+      Number(userDetail?.token) - Number(countToken(JSON.stringify(aiResp)));
+    await UpdateToken({
+      token: token,
+      userId: userDetail?._id,
+    });
   };
 
   return (

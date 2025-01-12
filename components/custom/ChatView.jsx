@@ -14,6 +14,13 @@ import React, { useContext, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useSidebar } from '../ui/sidebar';
 
+export const countToken = (inputText) => {
+  return inputText
+    .trim()
+    .split(/\s+/)
+    .filter((word) => word).length;
+};
+
 function ChatView() {
   const { id } = useParams();
   const convex = useConvex();
@@ -22,7 +29,8 @@ function ChatView() {
   const [userInput, setUserInput] = useState();
   const [loading, setLoading] = useState(false);
   const UpdateMessages = useMutation(api.workspace.UpdateMessages);
-  const {toggleSidebar} = useSidebar();
+  const { toggleSidebar } = useSidebar();
+  const UpdateToken = useMutation(api.users.UpdateToken);
 
   useEffect(() => {
     id && GetWorkspaceData();
@@ -47,7 +55,7 @@ function ChatView() {
   }, [messages]);
 
   const GetAiResponse = async () => {
-    return;
+    // return;
     setLoading(true);
     const PROMPT = JSON.stringify(messages) + Prompt.CHAT_PROMPT;
     console.log({ PROMPT });
@@ -60,11 +68,19 @@ function ChatView() {
       content: result.data.result,
     };
     setMessages((prev) => [...prev, aiResp]);
+    
+    // update token to database
 
     await UpdateMessages({
       messages: [...messages, aiResp],
       workspaceId: id,
     });
+    console.log("LEN", countToken(JSON.stringify(aiResp)));
+    const token = Number(userDetail?.token) - Number(countToken(JSON.stringify(aiResp)));
+    await UpdateToken({
+      token: token,
+      userId: userDetail?._id
+    })
 
     setLoading(false);
   };
@@ -77,7 +93,7 @@ function ChatView() {
   return (
     <div className="relative h-[83vh] flex flex-col">
       <div className="flex-1 overflow-y-scroll scrollbar-hide pl-10">
-        {messages?.map((msg, index) => (
+        {messages?.length > 0 && messages?.map((msg, index) => (
           <div
             key={index}
             className="p-3 rounded-lg mb-2 flex gap-2 items-center justify-start leading-7"
@@ -116,14 +132,12 @@ function ChatView() {
       <div className="flex gap-2 items-end ">
         {userDetail && (
           <Image
-
-          onClick={toggleSidebar}
-
+            onClick={toggleSidebar}
             src={userDetail?.picture}
             alt="userImage"
             width={30}
             height={30}
-            className='rounded-full cursor-pointer'
+            className="rounded-full cursor-pointer"
           />
         )}
         <div
