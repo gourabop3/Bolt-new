@@ -45,7 +45,7 @@ function ChatView() {
   }, [messages]);
 
   const GetAiResponse = async () => {
-    return;
+    return; 
     setLoading(true);
     const PROMPT = JSON.stringify(messages) + Prompt.CHAT_PROMPT;
     console.log({ PROMPT });
