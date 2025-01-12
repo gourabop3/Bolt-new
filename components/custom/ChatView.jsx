@@ -4,8 +4,10 @@ import { UserDetailContext } from '@/context/UserDetailContext';
 import { api } from '@/convex/_generated/api';
 import Colors from '@/data/Colors';
 import Lookup from '@/data/Lookup';
+import Prompt from '@/data/Prompt';
+import axios from 'axios';
 import { useConvex } from 'convex/react';
-import { ArrowRight, Link } from 'lucide-react';
+import { ArrowRight, Link, Loader2Icon } from 'lucide-react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
@@ -16,6 +18,7 @@ function ChatView() {
   const { messages, setMessages } = useContext(MessagesContext);
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
   const [userInput, setUserInput] = useState();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     id && GetWorkspaceData();
@@ -30,13 +33,45 @@ function ChatView() {
     });
     setMessages(result?.messages);
   };
+  useEffect(() => {
+    if (messages?.length > 0) {
+      const role = messages[messages?.length - 1].role;
+      if (role == 'user') {
+        GetAiResponse();
+      }
+    }
+  }, [messages]);
+
+  const GetAiResponse = async () => {
+    return;
+    setLoading(true);
+    const PROMPT = JSON.stringify(messages) + Prompt.CHAT_PROMPT;
+    console.log({ PROMPT });
+    const result = await axios.post('/api/ai-chat', {
+      prompt: PROMPT,
+    });
+    console.log(result.data.result);
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: 'ai',
+        content: result.data.result,
+      },
+    ]);
+    setLoading(false);
+  };
+
+  const onGenerate = (input) => {
+    setMessages((prev) => [...prev, { role: 'user', content: input }]);
+  };
+
   return (
     <div className="relative h-[83vh] flex flex-col">
-      <div className='flex-1 overflow-y-scroll'>
+      <div className="flex-1 overflow-y-scroll scrollbar-hide">
         {messages?.map((msg, index) => (
           <div
             key={index}
-            className="p-3 rounded-lg mb-2 flex gap-2 items-center justify-start"
+            className="p-3 rounded-lg mb-2 flex gap-2 items-center justify-start leading-7"
             style={{
               backgroundColor: Colors.CHAT_BACKGROUND,
             }}
@@ -53,6 +88,17 @@ function ChatView() {
             <h2>{msg?.content}</h2>
           </div>
         ))}
+        {loading && (
+          <div
+            className="p-3 rounded-lg mb-2 flex gap-2 items-center justify-start"
+            style={{
+              backgroundColor: Colors.CHAT_BACKGROUND,
+            }}
+          >
+            <Loader2Icon className="animate-spin" />
+            <h2>Generating response...</h2>
+          </div>
+        )}
       </div>
 
       {/* Input Section */}
