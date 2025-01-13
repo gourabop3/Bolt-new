@@ -18,6 +18,9 @@ import { useParams } from 'next/navigation';
 import { Loader2Icon } from 'lucide-react';
 import { countToken } from './ChatView';
 import { UserDetailContext } from '@/context/UserDetailContext';
+import { toast } from 'sonner';
+import SandpackPreviewClient from './SandpackPreviewClient';
+import { ActionContext } from '@/context/ActionContext';
 
 function CodeView() {
   const { id } = useParams();
@@ -26,6 +29,12 @@ function CodeView() {
   const { messages, setMessages } = useContext(MessagesContext);
   const UpdateFiles = useMutation(api.workspace.UpdateFiles);
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
+  const { action, setAction } = useContext(ActionContext);
+
+  useEffect(() => {
+    (action?.actionType == 'deploy' || action?.actionType == 'export') &&
+      setActiveTab('preview');
+  }, [action]);
 
   const convex = useConvex();
   const [loading, setLoading] = useState(false);
@@ -57,6 +66,10 @@ function CodeView() {
   }, [messages]);
 
   const GenerateAiCode = async () => {
+    if (userDetail?.token < 10) {
+      toast("You don't have enough token to generate code");
+      return;
+    }
     // return;
     setLoading(true);
     const PROMPT = JSON.stringify(messages) + ' ' + Prompt.CODE_GEN_PROMPT;
@@ -76,6 +89,7 @@ function CodeView() {
     setLoading(false);
     const token =
       Number(userDetail?.token) - Number(countToken(JSON.stringify(aiResp)));
+    setUserDetail((prev) => ({ ...prev, token: token }));
     await UpdateToken({
       token: token,
       userId: userDetail?._id,
@@ -119,10 +133,7 @@ function CodeView() {
             </>
           ) : (
             <>
-              <SandpackPreview
-                showNavigator={true}
-                style={{ height: '80vh' }}
-              />
+              <SandpackPreviewClient />
             </>
           )}
         </SandpackLayout>

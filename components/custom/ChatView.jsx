@@ -13,6 +13,7 @@ import { useParams } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useSidebar } from '../ui/sidebar';
+import { toast } from 'sonner';
 
 export const countToken = (inputText) => {
   return inputText
@@ -77,6 +78,7 @@ function ChatView() {
     });
     console.log("LEN", countToken(JSON.stringify(aiResp)));
     const token = Number(userDetail?.token) - Number(countToken(JSON.stringify(aiResp)));
+    setUserDetail(prev=>( {...prev, token: token}))
     await UpdateToken({
       token: token,
       userId: userDetail?._id
@@ -86,6 +88,11 @@ function ChatView() {
   };
 
   const onGenerate = (input) => {
+    if(userDetail?.token < 10) {
+      toast("You don't have enough token to generate code");
+      return ;
+
+    }
     setMessages((prev) => [...prev, { role: 'user', content: input }]);
     setUserInput('');
   };
