@@ -13,7 +13,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="max-h-1vh overflow-hidden">
+      <body >
         <ConvexClientProvider>
           <Provider>{children}</Provider>
         </ConvexClientProvider>

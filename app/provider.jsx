@@ -9,6 +9,7 @@ import { useConvex } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import AppSideBar from '@/components/custom/AppSideBar';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 
 function Provider({ children }) {
   const [messages, setMessages] = useState();
@@ -35,22 +36,24 @@ function Provider({ children }) {
       <GoogleOAuthProvider
         clientId={process.env.NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID_KEY}
       >
-        <UserDetailContext.Provider value={{ userDetail, setUserDetail }}>
-          <MessagesContext.Provider value={{ messages, setMessages }}>
-            <NextThemesProvider
-              attribute="class"
-              defaultTheme="dark"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <Header />
-              <SidebarProvider defaultOpen={false}>
-                <AppSideBar />
-                {children}
-              </SidebarProvider>
-            </NextThemesProvider>
-          </MessagesContext.Provider>
-        </UserDetailContext.Provider>
+        <PayPalScriptProvider options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_Id}}>
+          <UserDetailContext.Provider value={{ userDetail, setUserDetail }}>
+            <MessagesContext.Provider value={{ messages, setMessages }}>
+              <NextThemesProvider
+                attribute="class"
+                defaultTheme="dark"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <Header />
+                <SidebarProvider defaultOpen={false}>
+                  <AppSideBar />
+                  {children}
+                </SidebarProvider>
+              </NextThemesProvider>
+            </MessagesContext.Provider>
+          </UserDetailContext.Provider>
+        </PayPalScriptProvider>
       </GoogleOAuthProvider>
     </div>
   );
