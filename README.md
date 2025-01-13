@@ -24,6 +24,9 @@ If you find CodeMind AI helpful and would like to support its development, you c
 
 Your support is greatly appreciated and helps us continue to improve and maintain the project.
 
+## 🎥 Video Tutorial
+
+Watch the **[Video Tutorial](https://www.youtube.com/watch?v=YHJq1Dj6_Xc)** to learn how to use CodeMind AI effectively.
 
 ## ✨ Features That Empower You
 
