@@ -52,7 +52,7 @@ function Provider({ children }) {
               <ActionContext.Provider value={{action, setAction}}>
                 <NextThemesProvider
                   attribute="class"
-                  defaultTheme="dark"
+                  defaultTheme="light"
                   enableSystem
                   disableTransitionOnChange
                 >

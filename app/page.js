@@ -4,7 +4,7 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="mx-auto max-h-1vh overflow-hidden">
+    <div className="min-h-screen">
       <Hero /> 
     </div>
   );
