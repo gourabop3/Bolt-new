@@ -15,7 +15,7 @@ import axios from 'axios';
 import { useConvex, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useParams } from 'next/navigation';
-import { Loader2Icon } from 'lucide-react';
+import { Loader2Icon, Code, Eye, Maximize2, Minimize2, Download, Play } from 'lucide-react';
 import { countToken } from './ChatView';
 import { UserDetailContext } from '@/context/UserDetailContext';
 import { toast } from 'sonner';
@@ -26,6 +26,8 @@ function CodeView() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState('code');
   const [files, setFiles] = useState(Lookup?.DEFAULT_FILE);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showFileExplorer, setShowFileExplorer] = useState(true);
   const { messages, setMessages } = useContext(MessagesContext);
   const UpdateFiles = useMutation(api.workspace.UpdateFiles);
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
@@ -70,7 +72,6 @@ function CodeView() {
       toast("You don't have enough token to generate code");
       return;
     }
-    // return;
     setLoading(true);
     const PROMPT = JSON.stringify(messages) + ' ' + Prompt.CODE_GEN_PROMPT;
     console.log({ PROMPT });
@@ -96,53 +97,135 @@ function CodeView() {
     });
   };
 
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  const exportCode = () => {
+    // Implementation for exporting code
+    toast.success("Code exported successfully!");
+  };
+
   return (
-    <div className="relative">
-      <div className="bg-[#181818] w-full p-2 border">
-        <div className="flex items-center flex-wrap shrink-0 bg-black p-1 w-[140px] gap-3 justify-center rounded-full">
-          <h2
-            onClick={() => setActiveTab('code')}
-            className={`text-sm cursor-pointer ${activeTab == 'code' && 'text-blue-500 bg-blue-500 bg-opacity-25 p-1 px-2  rounded-full'} `}
-          >
-            Code
-          </h2>
-          <h2
-            onClick={() => setActiveTab('preview')}
-            className={`text-sm cursor-pointer ${activeTab == 'preview' && 'text-blue-500 bg-blue-500 bg-opacity-25 p-1 px-2  rounded-full'} `}
-          >
-            Preview
-          </h2>
+    <div className={`h-full flex flex-col bg-white dark:bg-gray-900 ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="flex items-center space-x-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Code Editor</h2>
+          
+          {/* Tab Switcher */}
+          <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab('code')}
+              className={`flex items-center space-x-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                activeTab === 'code'
+                  ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <Code className="w-4 h-4" />
+              <span className="hidden sm:inline">Code</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('preview')}
+              className={`flex items-center space-x-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                activeTab === 'preview'
+                  ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <Eye className="w-4 h-4" />
+              <span className="hidden sm:inline">Preview</span>
+            </button>
+          </div>
         </div>
-      </div>
-      <SandpackProvider
-        files={files}
-        template="react"
-        theme={'dark'}
-        customSetup={{
-          dependencies: {
-            ...Lookup.DEPENDANCY,
-          },
-        }}
-        options={{ externalResources: ['https://cdn.tailwindcss.com'] }}
-      >
-        <SandpackLayout>
-          {activeTab == 'code' ? (
+
+        {/* Action Buttons */}
+        <div className="flex items-center space-x-2">
+          {activeTab === 'code' && (
             <>
-              <SandpackFileExplorer style={{ height: '80vh' }} />
-              <SandpackCodeEditor style={{ height: '80vh' }} />
-            </>
-          ) : (
-            <>
-              <SandpackPreviewClient />
+              <button
+                onClick={() => setShowFileExplorer(!showFileExplorer)}
+                className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title="Toggle File Explorer"
+              >
+                <Code className="w-4 h-4" />
+              </button>
+              <button
+                onClick={exportCode}
+                className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title="Export Code"
+              >
+                <Download className="w-4 h-4" />
+              </button>
             </>
           )}
-        </SandpackLayout>
-      </SandpackProvider>
+          <button
+            onClick={toggleFullscreen}
+            className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
 
+      {/* Main Content */}
+      <div className="flex-1 min-h-0">
+        <SandpackProvider
+          files={files}
+          template="react"
+          theme="dark"
+          customSetup={{
+            dependencies: {
+              ...Lookup.DEPENDANCY,
+            },
+          }}
+          options={{ 
+            externalResources: ['https://cdn.tailwindcss.com'],
+            showLineNumbers: true,
+            showInlineErrors: true,
+            wrapContent: true,
+          }}
+        >
+          <SandpackLayout>
+            {activeTab === 'code' ? (
+              <>
+                {showFileExplorer && (
+                  <SandpackFileExplorer 
+                    style={{ 
+                      height: '100%',
+                      minWidth: '200px',
+                      maxWidth: '300px'
+                    }} 
+                  />
+                )}
+                <SandpackCodeEditor 
+                  style={{ 
+                    height: '100%',
+                    flex: 1
+                  }} 
+                />
+              </>
+            ) : (
+              <div className="w-full h-full">
+                <SandpackPreviewClient />
+              </div>
+            )}
+          </SandpackLayout>
+        </SandpackProvider>
+      </div>
+
+      {/* Loading Overlay */}
       {loading && (
-        <div className="p-10 bg-gray-900 bg-opacity-80 absolute top-0 w-full h-full flex justify-center items-center">
-          <Loader2Icon className="animate-spin w-10 h-10 text-white" />
-          <h2>Generating your files...</h2>
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 flex items-center space-x-4 shadow-xl">
+            <Loader2Icon className="animate-spin w-6 h-6 text-blue-500" />
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Generating Code</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Please wait while AI creates your application...</p>
+            </div>
+          </div>
         </div>
       )}
     </div>

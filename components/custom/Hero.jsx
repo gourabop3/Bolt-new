@@ -8,6 +8,8 @@ import React, { useContext, useState } from 'react';
 import SignInDialog from './SignInDialog';
 import ThemeToggle from './ThemeToggle';
 import MobileMenu from './MobileMenu';
+import PricingSection from './PricingSection';
+import Footer from './Footer';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useRouter } from 'next/navigation';
@@ -188,6 +190,12 @@ function Hero() {
         openDialog={openDialog}
         closeDialog={(v) => setOpenDialog(v)}
       />
+
+      {/* Pricing Section */}
+      <PricingSection />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
